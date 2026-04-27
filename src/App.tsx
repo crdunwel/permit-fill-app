@@ -4,8 +4,6 @@ import { useRef, useState } from "react";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import "./App.css";
 
-import { inspectPdfFields } from "./lib/inspectPdfFields";
-
 type PermitFormData = {
   ownerName: string;
   ownerAddress: string;
@@ -23,6 +21,20 @@ const initialFormData: PermitFormData = {
   phone: "",
   ownerSocialLast4: "",
 };
+
+function formatPhoneNumber(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 10);
+
+  if (digits.length <= 3) {
+    return digits;
+  }
+
+  if (digits.length <= 6) {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  }
+
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
 
 function makeSafeFilenamePart(value: string) {
   return value
@@ -108,7 +120,9 @@ export default function App() {
     setIsGenerating(true);
 
     try {
-      const pdfBytes = await fetch("/building-permit.pdf").then((response) => {
+      const pdfUrl = `${import.meta.env.BASE_URL}building-permit.pdf`;
+
+      const pdfBytes = await fetch(pdfUrl).then((response) => {
         if (!response.ok) {
           throw new Error("Could not load building-permit.pdf");
         }
@@ -185,7 +199,12 @@ export default function App() {
         updateFieldAppearances: false,
       });
 
-      const blob = new Blob([completedPdfBytes], {
+      const pdfArrayBuffer = new ArrayBuffer(completedPdfBytes.byteLength);
+      const pdfArray = new Uint8Array(pdfArrayBuffer);
+
+      pdfArray.set(completedPdfBytes);
+
+      const blob = new Blob([pdfArrayBuffer], {
         type: "application/pdf",
       });
 
@@ -291,7 +310,11 @@ export default function App() {
               Phone
               <input
                   value={formData.phone}
-                  onChange={(event) => updateField("phone", event.target.value)}
+                  onChange={(event) =>
+                      updateField("phone", formatPhoneNumber(event.target.value))
+                  }
+                  inputMode="tel"
+                  maxLength={14}
                   placeholder="(305) 555-1234"
               />
             </label>
