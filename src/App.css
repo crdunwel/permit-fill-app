@@ -232,3 +232,16 @@ button:disabled {
     height: 120px;
   }
 }
+
+.notice {
+  margin: 18px 0 18px;
+  border: 1px solid #9bb7d3;
+  border-left: 5px solid var(--md-blue);
+  border-radius: 10px;
+  background: #f0f6fc;
+  color: var(--md-blue-dark);
+  padding: 14px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.5;
+}

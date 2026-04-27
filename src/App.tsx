@@ -366,12 +366,11 @@ export default function App() {
           </div>
 
           <p className="notice">
-            This prepares the PDF only. Your contractor may still require wet
-            signature, notarization, or county-specific submission steps.
+            Not an official Miami-Dade site. No data is stored. You download the PDF directly.
           </p>
 
           <button disabled={!canGenerate || isGenerating} onClick={generatePdf}>
-            {isGenerating ? "Generating..." : "Generate completed PDF"}
+            {isGenerating ? "Generating..." : "Download completed PDF"}
           </button>
         </section>
       </main>
