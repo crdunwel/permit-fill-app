@@ -49,6 +49,7 @@ export default function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSigning, setIsSigning] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -57,6 +58,14 @@ export default function App() {
       ...current,
       [field]: value,
     }));
+  }
+
+  function hasFieldError(condition: boolean) {
+    return showErrors && condition;
+  }
+
+  function hasSignatureError() {
+    return showErrors && !hasSignature;
   }
 
   function getCanvasPoint(event: React.PointerEvent<HTMLCanvasElement>) {
@@ -114,6 +123,29 @@ export default function App() {
 
     context.clearRect(0, 0, canvas.width, canvas.height);
     setHasSignature(false);
+  }
+
+  const missingItems = [
+    !formData.ownerName.trim() && "Owner name",
+    !formData.ownerAddress.trim() && "Owner address",
+    !formData.city.trim() && "City",
+    !formData.zip.trim() && "Zip",
+    !formData.phone.trim() && "Phone",
+    formData.ownerSocialLast4.trim().length !== 4 &&
+    "Last 4 digits of owner SSN",
+    !hasSignature && "Signature",
+  ].filter(Boolean) as string[];
+
+  const canGenerate = missingItems.length === 0;
+
+  function handleDownloadClick() {
+    setShowErrors(true);
+
+    if (!canGenerate || isGenerating) {
+      return;
+    }
+
+    generatePdf();
   }
 
   async function generatePdf() {
@@ -232,15 +264,6 @@ export default function App() {
     }
   }
 
-  const canGenerate =
-      formData.ownerName.trim() &&
-      formData.ownerAddress.trim() &&
-      formData.city.trim() &&
-      formData.zip.trim() &&
-      formData.phone.trim() &&
-      formData.ownerSocialLast4.trim().length === 4 &&
-      hasSignature;
-
   return (
       <main className="page">
         <section className="card">
@@ -257,41 +280,65 @@ export default function App() {
             <label>
               Owner name
               <input
+                  className={
+                    hasFieldError(!formData.ownerName.trim()) ? "inputError" : ""
+                  }
                   value={formData.ownerName}
                   onChange={(event) => updateField("ownerName", event.target.value)}
                   placeholder="Full legal name"
               />
+              {hasFieldError(!formData.ownerName.trim()) && (
+                  <span className="fieldError">Please enter your name</span>
+              )}
             </label>
 
             <label>
               Owner address
               <input
+                  className={
+                    hasFieldError(!formData.ownerAddress.trim())
+                        ? "inputError"
+                        : ""
+                  }
                   value={formData.ownerAddress}
                   onChange={(event) =>
                       updateField("ownerAddress", event.target.value)
                   }
                   placeholder="Street address"
               />
+              {hasFieldError(!formData.ownerAddress.trim()) && (
+                  <span className="fieldError">Please enter your address</span>
+              )}
             </label>
 
             <label>
               City
               <input
+                  className={
+                    hasFieldError(!formData.city.trim()) ? "inputError" : ""
+                  }
                   value={formData.city}
                   onChange={(event) => updateField("city", event.target.value)}
                   placeholder="Miami, Hialeah, Homestead..."
               />
+              {hasFieldError(!formData.city.trim()) && (
+                  <span className="fieldError">Please enter your city</span>
+              )}
             </label>
 
             <div className="stateZipRow">
-              <label>
-                State
-                <input value="FL" disabled />
-              </label>
+              <div className="fieldGroup">
+                <label htmlFor="state">State</label>
+                <input id="state" value="FL" disabled />
+              </div>
 
-              <label>
-                Zip
+              <div className="fieldGroup">
+                <label htmlFor="zip">Zip</label>
                 <input
+                    id="zip"
+                    className={
+                      hasFieldError(!formData.zip.trim()) ? "inputError" : ""
+                    }
                     value={formData.zip}
                     onChange={(event) =>
                         updateField(
@@ -303,12 +350,19 @@ export default function App() {
                     maxLength={5}
                     placeholder="33176"
                 />
-              </label>
+
+                {hasFieldError(!formData.zip.trim()) && (
+                    <span className="fieldError">Please enter your zip</span>
+                )}
+              </div>
             </div>
 
             <label>
               Phone
               <input
+                  className={
+                    hasFieldError(!formData.phone.trim()) ? "inputError" : ""
+                  }
                   value={formData.phone}
                   onChange={(event) =>
                       updateField("phone", formatPhoneNumber(event.target.value))
@@ -317,11 +371,19 @@ export default function App() {
                   maxLength={14}
                   placeholder="(305) 555-1234"
               />
+              {hasFieldError(!formData.phone.trim()) && (
+                  <span className="fieldError">Please enter your phone number</span>
+              )}
             </label>
 
             <label>
               Last 4 digits of owner SSN
               <input
+                  className={
+                    hasFieldError(formData.ownerSocialLast4.length !== 4)
+                        ? "inputError"
+                        : ""
+                  }
                   value={formData.ownerSocialLast4}
                   onChange={(event) =>
                       updateField(
@@ -333,6 +395,11 @@ export default function App() {
                   maxLength={4}
                   placeholder="1234"
               />
+              {hasFieldError(formData.ownerSocialLast4.length !== 4) && (
+                  <span className="fieldError">
+                Please enter the last 4 digits of your social
+              </span>
+              )}
             </label>
           </div>
 
@@ -360,16 +427,21 @@ export default function App() {
                 onPointerCancel={endSignature}
             />
 
+            {hasSignatureError() && (
+                <p className="fieldError">Signature is required</p>
+            )}
+
             <p className="signatureHint">
               Sign with your finger, mouse, or trackpad.
             </p>
           </div>
 
           <p className="notice">
-            Not an official Miami-Dade site. No data is stored. You download the PDF directly.
+            Not an official Miami-Dade site. No data is stored. You download the
+            PDF directly.
           </p>
 
-          <button disabled={!canGenerate || isGenerating} onClick={generatePdf}>
+          <button disabled={isGenerating} onClick={handleDownloadClick}>
             {isGenerating ? "Generating..." : "Download completed PDF"}
           </button>
         </section>
