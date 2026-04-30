@@ -445,6 +445,25 @@ export default function App() {
             {isGenerating ? "Generating..." : "Download completed PDF"}
           </button>
         </section>
+
+        <footer className="siteFooter">
+          <div className="footerMeta">
+            <a
+                href="https://github.com/crdunwel/permit-fill-app"
+                target="_blank"
+                rel="noreferrer"
+            >
+              Source code
+            </a>
+          </div>
+
+          <a
+              className="footerCta"
+              href="mailto:clayton.dunwell@gmail.com?subject=Custom%20software%20request&body=Hi%2C%0A%0AI%20found%20your%20Miami-Dade%20Permit%20Helper.%0A%0AI%27m%20interested%20in%20something%20similar.%0A%0ABusiness%3A%0AWhat%20I%20want%20to%20improve%3A%0A"
+          >
+            Need something like this for your business?
+          </a>
+        </footer>
       </main>
   );
 }

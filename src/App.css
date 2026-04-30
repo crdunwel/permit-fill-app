@@ -299,3 +299,36 @@ label:has(.inputError) {
 .fieldGroup:has(.inputError) label {
   color: #b42318;
 }
+
+.siteFooter {
+  width: min(100%, 680px);
+  margin-top: 14px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--md-gray-500);
+}
+
+.footerMeta {
+  margin-bottom: 6px;
+}
+
+.footerMeta a {
+  color: var(--md-gray-500);
+  text-decoration: none;
+}
+
+.footerMeta a:hover {
+  text-decoration: underline;
+}
+
+.footerCta {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--md-blue-dark);
+  text-decoration: none;
+}
+
+.footerCta:hover {
+  text-decoration: underline;
+}
